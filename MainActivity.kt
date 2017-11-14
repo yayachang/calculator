@@ -2,22 +2,21 @@ package com.test.calculator
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import kotlinx.android.synthetic.main.activity_main.*
 import java.text.DecimalFormat
 
 class MainActivity : AppCompatActivity() {
-
-    var result:Double = 0.0
+    
     var inputNum:Double = 0.0
     var tmpNum:Double = 0.0
     var operator = ""
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        showTextView.text = "0"
 
         fun actionNum(action: String) = View.OnClickListener {
 
@@ -26,14 +25,9 @@ class MainActivity : AppCompatActivity() {
                 showTextView.text = showTextView.text.removeSuffix(removeItem)
             }
             if (operator != "") {
-                result = doCalculate(tmpNum, inputNum, operator)
-
-                var resultText = result.toString()
-                showTextView.text = ignoreDotZero(resultText)
+                showTextView.text = ignoreDotZero(doCalculate(tmpNum, inputNum, operator).toString())
                 operator = ""
-                Log.d("test", "result:"+showTextView.text)
             }
-
             showTextView.append(action)
 
         }
@@ -83,21 +77,33 @@ class MainActivity : AppCompatActivity() {
                 showTextView.append(".")
             }
         })
+        equalBtn.setOnClickListener(View.OnClickListener {
+
+            if (operator!="" && !isOperator(showTextView.text.toString())) {
+                showTextView.text = ignoreDotZero(doCalculate(tmpNum, inputNum, operator).toString())
+                operator = ""
+            }
+        })
+
 
         deleteBtn.setOnClickListener {
-            if (showTextView.text.length > 0) {
-                var deleteItem = showTextView.text[showTextView.text.lastIndex].toString()
-                showTextView.text = showTextView.text.removeSuffix(deleteItem)
-                if (deleteItem.contains("+")
-                        || deleteItem.contains("-")
-                        || deleteItem.contains("×")
-                        || deleteItem.contains("÷")) {
 
+            if (showTextView.text.length > 0) {
+
+                if(showTextView.text.length == 1){
+                    showTextView.text = "0"
+                }else {
+                    var removeItem = showTextView.text[showTextView.text.lastIndex].toString()
+                    showTextView.text = showTextView.text.removeSuffix(removeItem)
                 }
             }
+            inputNum = showTextView.text.toString().toDouble()
+
         }
         clearBtn.setOnClickListener {
-            showTextView.text = ""
+            showTextView.text = "0"
+            inputNum = 0.0
+            tmpNum = 0.0
         }
     }
 
@@ -136,7 +142,7 @@ class MainActivity : AppCompatActivity() {
 
         if (showText.substring(showText.length - 2, showText.length) == ".0") {
             val decimalFormat = DecimalFormat("#")
-            return decimalFormat.format(result)
+            return decimalFormat.format(showText.toDouble())
         } else {
             return showText
         }
